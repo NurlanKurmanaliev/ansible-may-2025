@@ -1,0 +1,44 @@
+packer {
+  required_plugins {
+    amazon = {
+      version = "1.2.8"
+      source  = "github.com/hashicorp/amazon"
+    }
+    ansible = {
+      version = "~> 1"
+      source  = "github.com/hashicorp/ansible"
+    }
+  }
+}
+
+source "amazon-ebs" "ubuntu" {
+  ami_name      = "wordpress-{{ timestamp }}"
+  instance_type = "t2.micro"
+  region        = "us-east-1"
+  source_ami = "ami-0a7d80731ae1b2435"
+  ssh_username = "ubuntu"
+  ssh_keypair_name = "Ansible-key"
+  ssh_private_key_file = "~/.ssh/id_rsa"
+
+#   ami_regions = [
+#     "us-east-2",
+#     "us-east-1",
+#     "us-west-2"
+#   ]
+}
+
+build {
+  name    = "learn-packer"
+  sources = [
+    "source.amazon-ebs.ubuntu"
+  ]
+  
+provisioner "shell" {
+    inline = [
+      "sleep 10"
+    ]
+  }
+  provisioner "ansible" {
+    playbook_file = "main.yml"
+  }
+}
